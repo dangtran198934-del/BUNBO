@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh Sách Công Việc - To-Do List</title>
+    <link rel="stylesheet" href="todo-style.css">
+</head>
+<body>
+    <div class="todo-container">
+        <!-- Header -->
+        <header class="todo-header">
+            <h1>✅ Danh Sách Công Việc</h1>
+            <p>Quản lý công việc hàng ngày của bạn</p>
+        </header>
+
+        <!-- Main Content -->
+        <div class="todo-main">
+            <!-- Input Section -->
+            <div class="input-section">
+                <div class="input-group">
+                    <input 
+                        type="text" 
+                        id="todoInput" 
+                        placeholder="Nhập công việc mới..." 
+                        class="todo-input"
+                        onkeypress="handleKeyPress(event)"
+                    >
+                    <button onclick="addTodo()" class="btn-add">➕ Thêm</button>
+                </div>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" onclick="filterTodos('all')">Tất Cả</button>
+                    <button class="filter-btn" onclick="filterTodos('active')">Chưa Hoàn Thành</button>
+                    <button class="filter-btn" onclick="filterTodos('completed')">Đã Hoàn Thành</button>
+                </div>
+            </div>
+
+            <!-- Stats Section -->
+            <div class="stats-section">
+                <div class="stat-item">
+                    <span class="stat-label">Tổng Công Việc:</span>
+                    <span class="stat-value" id="totalCount">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Chưa Hoàn Thành:</span>
+                    <span class="stat-value active-count" id="activeCount">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Đã Hoàn Thành:</span>
+                    <span class="stat-value completed-count" id="completedCount">0</span>
+                </div>
+            </div>
+
+            <!-- Todo List -->
+            <div class="todo-list-section">
+                <ul class="todo-list" id="todoList"></ul>
+            </div>
+
+            <!-- Priority Levels Legend -->
+            <div class="priority-legend">
+                <h3>🎯 Mức Ưu Tiên:</h3>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <span class="priority-badge high"></span>
+                        <span>Cao</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="priority-badge medium"></span>
+                        <span>Trung Bình</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="priority-badge low"></span>
+                        <span>Thấp</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button onclick="clearCompleted()" class="btn-action btn-clear">🗑️ Xóa Hoàn Thành</button>
+                <button onclick="exportTodos()" class="btn-action btn-export">📥 Xuất Dữ Liệu</button>
+                <button onclick="clearAllTodos()" class="btn-action btn-danger">❌ Xóa Tất Cả</button>
+            </div>
+        </div>
+
+        <!-- Advanced Features -->
+        <div class="advanced-section">
+            <h2>⚙️ Tính Năng Nâng Cao</h2>
+            
+            <div class="feature-group">
+                <h3>📅 Thêm Công Việc Với Hạn Chót</h3>
+                <div class="input-row">
+                    <input type="text" id="advancedTodoInput" placeholder="Tên công việc" class="input-field">
+                    <select id="prioritySelect" class="input-field">
+                        <option value="low">Mức Thấp</option>
+                        <option value="medium" selected>Mức Trung Bình</option>
+                        <option value="high">Mức Cao</option>
+                    </select>
+                    <input type="date" id="dueDateInput" class="input-field">
+                    <button onclick="addAdvancedTodo()" class="btn-add">➕ Thêm Nâng Cao</button>
+                </div>
+            </div>
+
+            <div class="feature-group">
+                <h3>🔍 Tìm Kiếm & Sắp Xếp</h3>
+                <div class="input-row">
+                    <input type="text" id="searchInput" placeholder="🔎 Tìm kiếm công việc..." class="input-field" oninput="searchTodos()">
+                    <select id="sortSelect" class="input-field" onchange="sortTodos()">
+                        <option value="date-desc">Mới Nhất Trước</option>
+                        <option value="date-asc">Cũ Nhất Trước</option>
+                        <option value="priority">Ưu Tiên Cao Trước</option>
+                        <option value="name">Theo Tên (A-Z)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="feature-group">
+                <h3>📊 Thống Kê</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-icon">📈</span>
+                        <span class="stat-text">Tỉ Lệ Hoàn Thành: <strong id="completionRate">0%</strong></span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-icon">⏰</span>
+                        <span class="stat-text">Công Việc Quá Hạn: <strong id="overdueCount">0</strong></span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-icon">⚡</span>
+                        <span class="stat-text">Ưu Tiên Cao: <strong id="highPriorityCount">0</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditModal()">&times;</span>
+            <h2>Chỉnh Sửa Công Việc</h2>
+            <input type="text" id="editTodoText" placeholder="Tên công việc" class="input-field">
+            <select id="editPriority" class="input-field">
+                <option value="low">Mức Thấp</option>
+                <option value="medium">Mức Trung Bình</option>
+                <option value="high">Mức Cao</option>
+            </select>
+            <input type="date" id="editDueDate" class="input-field">
+            <div class="modal-buttons">
+                <button onclick="saveEditTodo()" class="btn-add">💾 Lưu</button>
+                <button onclick="closeEditModal()" class="btn-action">❌ Hủy</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="todo-app.js"></script>
+</body>
+</html>
